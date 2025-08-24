@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <!-- 声明文档类型为 HTML5，设置页面语言为中文（简体） -->
+  <head>
+    <meta charset="UTF-8" />
+    <!-- 设置网页编码为 UTF-8，保证中文不乱码 -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 让页面在移动端正常显示，适配不同设备的宽度 -->
+
+    <title>恋い惚</title>
+    <!-- 页面标题，会显示在浏览器标签上 -->
+
+    <!-- 预加载样式防止闪屏 -->
+    <style>
+      /* 通用样式：清除默认的内外边距，设置盒子模型为border-box */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 设置html和body全屏显示，默认字体，以及禁止滚动条 */
+      html,
+      body {
+        height: 100%;
+        font-family: "Noto Sans SC", sans-serif;
+        overflow: hidden;
+      }
+
+      /* 初始状态下，页面内容不可见，避免加载时出现闪烁 */
+      body {
+        visibility: hidden;
+      }
+
+      /* 容器：flex布局，水平排列，占满全屏，默认透明（0） */
+      .container {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out; /* 渐变过渡动画 */
+      }
+
+      /* 当 body 被添加 loaded 类时，显示页面 */
+      body.loaded {
+        visibility: visible;
+      }
+
+      /* loaded 状态下，容器渐渐显示出来 */
+      body.loaded .container {
+        opacity: 1;
+      }
+    </style>
+
+    <!-- 动态加载主题CSS（通过JS更改 href 地址来切换主题） -->
+    <link id="theme-css" rel="stylesheet" href="" />
+  </head>
+  <body>
+    <main class="container">
+      <!-- 左侧图像区域（未来可以放图片或背景） -->
+      <section class="image-column"></section>
+
+      <!-- 右侧文本区域，展示诗歌内容 -->
+      <section class="text-column">
+        <div class="poem">
+          <h1>时轮之上</h1>
+          <!-- 使用 <p> 分段，<br /> 实现换行 -->
+          <p>车厢载着我们<br />缓缓上升<br />视野在开阔<br />世界却远离</p>
+          <p>也许是高度<br />抑或悸动<br />身体有些僵硬<br />在这旋转的时空</p>
+          <p>
+            最高处<br />本该俯瞰横滨城<br />我的目光却只停留<br />在对面女孩的脸庞
+          </p>
+          <p>此刻<br />世界是这车厢<br />而女孩<br />是这世界的全部</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- 背景音乐播放器（自动循环播放指定的音频文件） -->
+    <audio id="music-player" src="audio/River-Flows-in-You.flac" loop></audio>
+
+    <!-- 音乐开关按钮：包含播放与暂停两种图标 -->
+    <div class="music-toggle" id="music-toggle">
+      <img class="icon-play" src="images/sound-off.gif" alt="Play Music" />
+      <img class="icon-pause" src="images/sound-on.gif" alt="Pause Music" />
+    </div>
+
+    <!-- 外部JS文件，负责逻辑（如音乐控制、主题切换、动画效果等） -->
+    <script src="scripts/script.js"></script>
+  </body>
+</html>
