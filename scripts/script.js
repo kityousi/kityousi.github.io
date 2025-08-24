@@ -1,6 +1,7 @@
 // 页面加载和动画控制
 window.addEventListener("DOMContentLoaded", function () {
   const cssLink = document.getElementById("theme-css");
+  let pageInitialized = false; // 添加一个标志位，防止重复初始化
 
   // 检测设备类型
   const isMobile =
@@ -14,15 +15,25 @@ window.addEventListener("DOMContentLoaded", function () {
     cssLink.href = "styles/desktop.css";
   }
 
-  // 确保CSS加载完成
-  cssLink.addEventListener("load", function () {
-    initializePage();
-  });
-
-  // 如果CSS已经缓存，立即初始化
-  if (cssLink.sheet) {
+  // ---- 修复竞态条件的核心逻辑 ----
+  // 创建一个保证只执行一次的初始化函数
+  function runInitialization() {
+    // 如果已经初始化过，就直接退出，避免重复执行
+    if (pageInitialized) return;
+    // 标记为已初始化
+    pageInitialized = true;
+    // 执行真正的初始化函数
     initializePage();
   }
+
+  // 为CSS加载完成事件绑定函数
+  cssLink.addEventListener("load", runInitialization);
+
+  // 同时，检查CSS是否已从缓存加载完毕 (作为备用，应对某些浏览器不触发load事件的情况)
+  if (cssLink.sheet) {
+    runInitialization();
+  }
+  // ---- 修复逻辑结束 ----
 
   function initializePage() {
     // 预加载关键图片
@@ -35,9 +46,11 @@ window.addEventListener("DOMContentLoaded", function () {
 
     // 根据设备类型添加背景图片预加载
     if (isMobile) {
+      // 注意: 确保这里的路径和CSS文件中的路径匹配
       imagesToPreload.push("images/ferris-phone.jpg");
     } else {
-      imagesToPreload.push("images/ferris.jpeg");
+      // 确保这里的路径和CSS文件中的路径匹配
+      imagesToPreload.push("images/ferris.jpg");
     }
 
     let loadedCount = 0;
@@ -50,18 +63,19 @@ window.addEventListener("DOMContentLoaded", function () {
       }
     }
 
+    // 如果没有图片需要加载，直接开始动画
+    if (totalImages === 0) {
+      startAnimation();
+      return;
+    }
+    
     // 预加载图片
     imagesToPreload.forEach((src) => {
       const img = new Image();
       img.onload = onImageLoad;
-      img.onerror = onImageLoad; // 即使加载失败也继续
+      img.onerror = onImageLoad; // 即使加载失败也继续，避免页面卡住
       img.src = src;
     });
-
-    // 如果没有图片需要加载，直接开始动画
-    if (totalImages === 0) {
-      startAnimation();
-    }
   }
 
   function startAnimation() {
@@ -98,14 +112,14 @@ window.addEventListener("DOMContentLoaded", function () {
         musicPlayer
           .play()
           .then(() => {
-            musicToggle.classList.add("playing");
+            // musicToggle.classList.add("playing"); // 'play'事件会处理这个
           })
           .catch((error) => {
             console.log("播放失败:", error);
           });
       } else {
         musicPlayer.pause();
-        musicToggle.classList.remove("playing");
+        // musicToggle.classList.remove("playing"); // 'pause'事件会处理这个
       }
     });
 
@@ -127,30 +141,31 @@ window.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  let currentIsMobile = isMobile;
   // 处理窗口大小改变
   window.addEventListener("resize", function () {
     const newIsMobile =
       /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       window.innerWidth <= 768;
 
-    if (newIsMobile !== isMobile) {
+    if (newIsMobile !== currentIsMobile) {
       // 如果设备类型发生改变，重新加载页面
       location.reload();
     }
   });
 
-  // 添加一些用户体验优化
+  // 处理页面可见性变化
   document.addEventListener("visibilitychange", function () {
     const musicPlayer = document.getElementById("music-player");
-    const musicToggle = document.getElementById("music-toggle");
-
+    if (!musicPlayer) return;
+    
     if (document.hidden) {
-      // 页面隐藏时暂停音乐（可选）
+      // 页面隐藏时可以考虑暂停音乐（可选）
       // musicPlayer.pause();
     } else {
       // 页面重新可见时的处理
-      if (musicPlayer && !musicPlayer.paused) {
-        musicToggle.classList.add("playing");
+      if (!musicPlayer.paused) {
+         musicToggle.classList.add("playing");
       }
     }
   });
