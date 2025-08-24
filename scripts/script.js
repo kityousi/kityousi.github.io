@@ -1,42 +1,36 @@
-// 页面加载和动画控制
-window.addEventListener("DOMContentLoaded", function () {
-  const cssLink = document.getElementById("theme-css");
-  let pageInitialized = false; // 添加一个标志位，防止重复初始化
+// scripts/script.js (完整替换)
 
-  // 检测设备类型
+window.addEventListener("DOMContentLoaded", function () {
+  // --- 1. 使用更可靠的方式加载CSS并触发回调 ---
+
+  const themeLink = document.createElement("link");
+  themeLink.rel = "stylesheet";
+
   const isMobile =
     /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
     window.innerWidth <= 768;
 
-  // 动态加载对应的CSS文件
-  if (isMobile) {
-    cssLink.href = "styles/mobile.css";
-  } else {
-    cssLink.href = "styles/desktop.css";
-  }
+  themeLink.href = isMobile ? "styles/mobile.css" : "styles/desktop.css";
 
-  // ---- 修复竞态条件的核心逻辑 ----
-  // 创建一个保证只执行一次的初始化函数
-  function runInitialization() {
-    // 如果已经初始化过，就直接退出，避免重复执行
-    if (pageInitialized) return;
-    // 标记为已初始化
-    pageInitialized = true;
-    // 执行真正的初始化函数
+  // 关键：监听新创建的link元素的load事件，这是最可靠的方式
+  themeLink.addEventListener("load", initializePage);
+  
+  // 关键：处理加载失败的情况
+  themeLink.addEventListener("error", () => {
+    console.error("主题CSS文件加载失败！");
+    // 即使CSS失败，也尝试启动动画，避免页面一片空白
     initializePage();
-  }
+  });
 
-  // 为CSS加载完成事件绑定函数
-  cssLink.addEventListener("load", runInitialization);
+  // 将创建的link元素添加到head中，浏览器会自动开始加载
+  document.head.appendChild(themeLink);
+  // 删除HTML中旧的、空的link标签（可选，但推荐）
+  document.getElementById("theme-css")?.remove();
 
-  // 同时，检查CSS是否已从缓存加载完毕 (作为备用，应对某些浏览器不触发load事件的情况)
-  if (cssLink.sheet) {
-    runInitialization();
-  }
-  // ---- 修复逻辑结束 ----
+
+  // --- 2. 页面初始化与动画 ---
 
   function initializePage() {
-    // 预加载关键图片
     const imagesToPreload = [];
     const musicToggleImages = document.querySelectorAll(".music-toggle img");
 
@@ -44,129 +38,93 @@ window.addEventListener("DOMContentLoaded", function () {
       imagesToPreload.push(img.src);
     });
 
-    // 根据设备类型添加背景图片预加载
     if (isMobile) {
-      // 注意: 确保这里的路径和CSS文件中的路径匹配
       imagesToPreload.push("images/ferris-phone.jpg");
     } else {
-      // 确保这里的路径和CSS文件中的路径匹配
       imagesToPreload.push("images/ferris.jpg");
     }
 
     let loadedCount = 0;
     const totalImages = imagesToPreload.length;
 
-    function onImageLoad() {
+    const onImageLoad = () => {
       loadedCount++;
       if (loadedCount >= totalImages) {
         startAnimation();
       }
-    }
+    };
 
-    // 如果没有图片需要加载，直接开始动画
     if (totalImages === 0) {
       startAnimation();
       return;
     }
     
-    // 预加载图片
     imagesToPreload.forEach((src) => {
       const img = new Image();
       img.onload = onImageLoad;
-      img.onerror = onImageLoad; // 即使加载失败也继续，避免页面卡住
+      img.onerror = onImageLoad;
       img.src = src;
     });
   }
 
   function startAnimation() {
-    // 小延迟确保所有样式都已应用
     setTimeout(() => {
       document.body.classList.add("loaded");
-      setupAudio();
+      // 注意：将音频设置从这里移出，改为用户交互触发
     }, 100);
   }
 
-  function setupAudio() {
-    const musicPlayer = document.getElementById("music-player");
-    const musicToggle = document.getElementById("music-toggle");
 
-    if (!musicPlayer || !musicToggle) return;
+  // --- 3. 重构音频逻辑，以用户交互为中心 ---
+  
+  const musicPlayer = document.getElementById("music-player");
+  const musicToggle = document.getElementById("music-toggle");
+  let isMusicInitialized = false; // 标志位，确保音乐只被初始化一次
 
-    // 尝试自动播放音乐
-    setTimeout(() => {
-      const playPromise = musicPlayer.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            musicToggle.classList.add("playing");
-          })
-          .catch((error) => {
-            console.log("自动播放被浏览器阻止，需要用户交互:", error);
+  function handleMusicToggle() {
+      // 用户的第一次点击，是初始化音乐的最佳时机
+      if (!isMusicInitialized) {
+          isMusicInitialized = true;
+          // 尝试播放，这次因为是用户点击触发，所以会成功
+          musicPlayer.play().then(() => {
+              musicToggle.classList.add("playing");
+          }).catch(error => {
+              console.error("即使用户交互，播放还是失败了:", error);
           });
+          return;
       }
-    }, 1000); // 延迟1秒再尝试播放，让动画先进行
-
-    // 音乐控制按钮事件
-    musicToggle.addEventListener("click", function () {
+      
+      // 后续点击，执行正常的播放/暂停逻辑
       if (musicPlayer.paused) {
-        musicPlayer
-          .play()
-          .then(() => {
-            // musicToggle.classList.add("playing"); // 'play'事件会处理这个
-          })
-          .catch((error) => {
-            console.log("播放失败:", error);
-          });
+          musicPlayer.play();
       } else {
-        musicPlayer.pause();
-        // musicToggle.classList.remove("playing"); // 'pause'事件会处理这个
+          musicPlayer.pause();
       }
-    });
+  }
 
-    // 音乐结束时重置按钮状态
-    musicPlayer.addEventListener("ended", function () {
-      musicToggle.classList.remove("playing");
-    });
+  if (musicPlayer && musicToggle) {
+    musicToggle.addEventListener("click", handleMusicToggle);
 
-    // 音乐暂停时重置按钮状态
-    musicPlayer.addEventListener("pause", function () {
-      if (!musicPlayer.ended) {
-        musicToggle.classList.remove("playing");
-      }
-    });
-
-    // 音乐开始播放时设置按钮状态
-    musicPlayer.addEventListener("play", function () {
+    musicPlayer.addEventListener("play", () => {
       musicToggle.classList.add("playing");
+    });
+
+    musicPlayer.addEventListener("pause", () => {
+      musicToggle.classList.remove("playing");
     });
   }
 
+
+  // --- 4. 其他辅助逻辑 (保持不变) ---
+  
   let currentIsMobile = isMobile;
-  // 处理窗口大小改变
   window.addEventListener("resize", function () {
     const newIsMobile =
       /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
       window.innerWidth <= 768;
 
     if (newIsMobile !== currentIsMobile) {
-      // 如果设备类型发生改变，重新加载页面
       location.reload();
-    }
-  });
-
-  // 处理页面可见性变化
-  document.addEventListener("visibilitychange", function () {
-    const musicPlayer = document.getElementById("music-player");
-    if (!musicPlayer) return;
-    
-    if (document.hidden) {
-      // 页面隐藏时可以考虑暂停音乐（可选）
-      // musicPlayer.pause();
-    } else {
-      // 页面重新可见时的处理
-      if (!musicPlayer.paused) {
-         musicToggle.classList.add("playing");
-      }
     }
   });
 });
