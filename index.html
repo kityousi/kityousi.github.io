@@ -51,12 +51,25 @@
       body.loaded .container {
         opacity: 1;
       }
+
+      /* 加载指示器样式 */
+      .loading-indicator {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #f0e6ff;
+        font-size: 1rem;
+        z-index: 1000;
+      }
     </style>
 
     <!-- 动态加载主题CSS（通过JS更改 href 地址来切换主题） -->
     <link id="theme-css" rel="stylesheet" href="" />
   </head>
   <body>
+    <div class="loading-indicator" id="loading-indicator">加载中...</div>
+    
     <main class="container">
       <!-- 左侧图像区域（未来可以放图片或背景） -->
       <section class="image-column"></section>
@@ -77,7 +90,7 @@
     </main>
 
     <!-- 背景音乐播放器（自动循环播放指定的音频文件） -->
-    <audio id="music-player" src="audio/River-Flows-in-You.flac" loop></audio>
+    <audio id="music-player" src="audio/River-Flows-in-You.flac" loop preload="metadata"></audio>
 
     <!-- 音乐开关按钮：包含播放与暂停两种图标 -->
     <div class="music-toggle" id="music-toggle">
