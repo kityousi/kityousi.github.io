@@ -1,17 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <!-- 声明文档类型为 HTML5，设置页面语言为中文（简体） -->
   <head>
     <meta charset="UTF-8" />
-    <!-- 设置网页编码为 UTF-8，保证中文不乱码 -->
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- 让页面在移动端正常显示，适配不同设备的宽度 -->
-
     <title>恋い惚</title>
-    <!-- 页面标题，会显示在浏览器标签上 -->
-
-    <!-- 预加载样式防止闪屏 -->
     <style>
       /* 通用样式：清除默认的内外边距，设置盒子模型为border-box */
       * {
@@ -51,34 +43,17 @@
       body.loaded .container {
         opacity: 1;
       }
-
-      /* 加载指示器样式 */
-      .loading-indicator {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        color: #f0e6ff;
-        font-size: 1rem;
-        z-index: 1000;
-      }
     </style>
 
-    <!-- 动态加载主题CSS（通过JS更改 href 地址来切换主题） -->
     <link id="theme-css" rel="stylesheet" href="" />
   </head>
   <body>
-    <div class="loading-indicator" id="loading-indicator">加载中...</div>
-    
     <main class="container">
-      <!-- 左侧图像区域（未来可以放图片或背景） -->
       <section class="image-column"></section>
 
-      <!-- 右侧文本区域，展示诗歌内容 -->
       <section class="text-column">
         <div class="poem">
           <h1>时轮之上</h1>
-          <!-- 使用 <p> 分段，<br /> 实现换行 -->
           <p>车厢载着我们<br />缓缓上升<br />视野在开阔<br />世界却远离</p>
           <p>也许是高度<br />抑或悸动<br />身体有些僵硬<br />在这旋转的时空</p>
           <p>
@@ -89,16 +64,13 @@
       </section>
     </main>
 
-    <!-- 背景音乐播放器（自动循环播放指定的音频文件） -->
-    <audio id="music-player" src="audio/River-Flows-in-You.flac" loop preload="metadata"></audio>
+    <audio id="music-player" src="audio/River-Flows-in-You.flac" loop></audio>
 
-    <!-- 音乐开关按钮：包含播放与暂停两种图标 -->
     <div class="music-toggle" id="music-toggle">
       <img class="icon-play" src="images/sound-off.gif" alt="Play Music" />
       <img class="icon-pause" src="images/sound-on.gif" alt="Pause Music" />
     </div>
 
-    <!-- 外部JS文件，负责逻辑（如音乐控制、主题切换、动画效果等） -->
     <script src="scripts/script.js"></script>
   </body>
 </html>
