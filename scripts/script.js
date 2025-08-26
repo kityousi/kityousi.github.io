@@ -143,19 +143,7 @@
       musicToggle.classList.remove("playing");
     });
     
-    // 尝试自动播放（延迟执行，让动画先开始）
-    setTimeout(() => {
-      const playPromise = musicPlayer.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            musicToggle.classList.add("playing");
-          })
-          .catch((error) => {
-            console.log("自动播放被浏览器阻止，需要用户交互:", error);
-          });
-      }
-    }, 1500);
+    // 音频已准备好，等待用户手动播放
   }
   
   // 音乐播放/暂停控制
