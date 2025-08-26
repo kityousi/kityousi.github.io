@@ -19,9 +19,28 @@ body {
   display: flex;
   flex-direction: column; /* 上下排列（适合竖屏） */
   width: 100%;
-  height: 100vh; /* 高度等于一屏 */
+  min-height: 100vh; /* 最小高度等于一屏 */
   opacity: 0; /* 初始透明 */
   transition: opacity 1.5s ease-in-out;
+}
+
+/* 加载指示器 */
+.loading-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #f0e6ff;
+  font-size: 1rem;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+/* 隐藏加载指示器 */
+body.loaded .loading-indicator {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* 图片区域（顶部） */
@@ -48,6 +67,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: calc(100vh - 56.25vw); /* 减去图片高度 */
 }
 
 /* 诗歌整体样式 */
@@ -106,7 +126,7 @@ body {
   opacity: 0; /* 初始隐藏 */
   transform: scale(0.6); /* 初始缩小 */
   transition: opacity 1s ease-in-out 1.9s, transform 1s ease-in-out 1.9s;
-  z-index: 100; /* 确保按钮在最上层 */
+  z-index: 1001; /* 确保按钮在最上层 */
 }
 
 /* 按下按钮时，快速缩小，模拟点击效果 */
@@ -119,6 +139,7 @@ body {
 .music-toggle img {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 /* 默认暂停图标隐藏 */
@@ -163,6 +184,7 @@ body.loaded .music-toggle {
 @media (max-height: 640px) {
   .text-column {
     padding: 1.5rem 1rem 3.5rem; /* 缩小上下边距 */
+    min-height: calc(100vh - 40vw); /* 调整最小高度 */
   }
   .poem h1 {
     font-size: 1.9rem;
@@ -170,7 +192,7 @@ body.loaded .music-toggle {
   }
   .poem p {
     font-size: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.2rem;
     line-height: 1.8;
   }
 }
@@ -186,7 +208,11 @@ body.loaded .music-toggle {
   }
   .poem p {
     font-size: 0.95rem;
-    margin-bottom: 1.3rem;
+    margin-bottom: 1rem;
     line-height: 1.7;
+  }
+  .text-column {
+    padding: 1.2rem 1rem 3rem;
+    min-height: calc(100vh - 35vw);
   }
 }
